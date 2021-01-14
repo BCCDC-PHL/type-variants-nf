@@ -16,7 +16,7 @@ workflow ncovIllumina {
 }
 
 workflow {
-  Channel.fromFilePairs( "${params.variants_dir}/*.variants.tsv", size: 1, flat: true ).set{ ch_variants_files }
+  Channel.fromFilePairs( "${params.variants_dir}/*.variants.tsv", size: 1, flat: true ).filter{ !( it[0] =~ /^POS/ ) }.filter{ !( it[0] =~ /^NEG/ ) }.set{ ch_variants_files }
   Channel.fromPath( params.ref ).set{ ch_ref }
   Channel.fromPath( params.gff ).set{ ch_gff }
   Channel.fromPath( params.yaml ).set{ ch_yaml }
