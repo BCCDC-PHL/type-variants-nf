@@ -30,7 +30,7 @@ def parse_args(args=None):
 
     return parser.parse_args(args)
 
-def ivar_variants_to_vcf_string(FileIn,RefIn):
+def ivar_variants_to_vcf_string(FileIn,RefIn,minAF):
     '''
      Credit to nf-core: https://github.com/nf-core/viralrecon
 
@@ -77,6 +77,7 @@ def ivar_variants_to_vcf_string(FileIn,RefIn):
                 ID='.'
                 REF=line[2]
                 ALT=line[3]
+                ALT_FREQ=line[10]
                 var_type = 'SNP'
                 if ALT[0] == '+':
                     ALT = REF + ALT[1:]
@@ -97,6 +98,8 @@ def ivar_variants_to_vcf_string(FileIn,RefIn):
                 oline = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE
                 writeLine = True
                 if (CHROM,POS,REF,ALT) in varList:
+                    writeLine = False
+                if float(ALT_FREQ) < minAF:
                     writeLine = False
                 if re.match('^.*N+$', REF):
                     writeLine = False
@@ -348,7 +351,7 @@ def main(args=None):
     args = parse_args(args)
 
     if args.TSV_IN:
-        vcfString = ivar_variants_to_vcf_string(args.TSV_IN,args.REF_IN)
+        vcfString = ivar_variants_to_vcf_string(args.TSV_IN,args.REF_IN,args.ALLELE_FREQ_THRESH)
 
     elif args.VCF_IN:
         vcfString = read_vcf_to_vcf_string(args.VCF_IN)
